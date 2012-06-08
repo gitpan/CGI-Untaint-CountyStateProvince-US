@@ -15,7 +15,7 @@ WriteMakefile(
         'Test::More' => 0.82,	# Need new_ok()
 	'CGI::Untaint' => 0,
 	'CGI::Untaint::CountyStateProvince' => 0.04,
-	'Locale::US' => 0,
+	'Locale::SubCountry' => 0,
 	'Test::NoWarnings' => 0,
 	'Test::Kwalitee' => 0,
     },

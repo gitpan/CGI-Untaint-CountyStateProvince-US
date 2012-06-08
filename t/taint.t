@@ -8,7 +8,7 @@ eval 'use Test::Taint';
 if($@) {
 	plan skip_all => 'Test::Taint required for testing untainting';
 } else {
-	plan tests => 10;
+	plan tests => 11;
 
 	use_ok('CGI::Untaint');
 	use_ok('CGI::Untaint::CountyStateProvince::US');
@@ -32,6 +32,7 @@ if($@) {
 	ok($c eq 'MD', 'MD');
 
 	$c = $untainter->extract(-as_CountyStateProvince => 'state2');
+	tainted_ok($vars->{'state2'});
 	untainted_ok($c);
 	ok($c eq 'VA', 'Virginia');
 }

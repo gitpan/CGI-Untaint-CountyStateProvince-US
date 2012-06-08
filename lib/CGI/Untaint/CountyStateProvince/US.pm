@@ -2,7 +2,7 @@ package CGI::Untaint::CountyStateProvince::US;
 
 use warnings;
 use strict;
-use Locale::US;
+use Locale::SubCountry;
 
 # use base qw(CGI::Untaint::object CGI::Untaint::CountyStateProvince);
 use base 'CGI::Untaint::object';
@@ -13,16 +13,17 @@ CGI::Untaint::CountyStateProvince::US - Add U.S. states to CGI::Untaint::CountyS
 
 =head1 VERSION
 
-Version 0.01
+Version 0.02
 
 =cut
 
-our $VERSION = '0.01';
+our $VERSION = '0.02';
 
 =head1 SYNOPSIS
 
 Adds a list of U.S. states to the list of counties/state/provinces
-which are known by the CGI::Untaint::CountyStateProvince validator.
+which are known by the CGI::Untaint::CountyStateProvince validator so that
+an HTML form sent by CGI contains a valid U.S. state.
 
 You must include CGI::Untaint::CountyStateProvince::US after including
 CGI::Untaint, otherwise it won't work.
@@ -48,9 +49,9 @@ given state.  See CGI::Untaint::is_valid.
 =cut
 
 sub is_valid {
-	my ($self, $value) = @_;
+	my $self = shift;
 
-	$value = uc($self->value);
+	my $value = uc($self->value);
 
 	if($value =~ /([A-Z\s]+)/) {
 		$value = $1;
@@ -58,17 +59,27 @@ sub is_valid {
 		return 0;
 	}
 
-	unless($self->{_table}) {
-		$self->{_table} = Locale::US->new();
+	unless($self->{_validator}) {
+		$self->{_validator} = Locale::SubCountry->new('US');
 	}
 
-	if(exists($self->{_table}{code2state}{$value})) {
-		# Two letter postal abbreviation
+	unless($self->{_validator}) {
+		return 0;
+	}
+
+	my $state = $self->{_validator}->code($value);
+	if($state && ($state ne 'unknown')) {
+		# Detaintify
+		if($state =~ /(^[A-Z]{2}$)/) {
+			return $1;
+		}
+	}
+
+	$state = $self->{_validator}->full_name($value);
+	if($state && ($state ne 'unknown')) {
 		return $value;
 	}
-	if(exists($self->{_table}{state2code}{$value})) {
-		return $self->{_table}{state2code}{$value};
-	}
+
 	return 0;
 }
 
